@@ -2792,7 +2792,9 @@ export abstract class AbstractMesh extends TransformNode implements IDisposable,
      */
     public getFacetNormalToRef(i: number, ref: Vector3) {
         const localNorm = this.getFacetLocalNormals()[i];
-        Vector3.TransformNormalToRef(localNorm, this.getWorldMatrix(), ref);
+        // The inverse transpose keeps the world normal orthogonal to the transformed facet when scaling is non-uniform.
+        const normalMatrix = this.getWorldMatrix().toNormalMatrix(TmpVectors.Matrix[2]);
+        Vector3.TransformNormalToRef(localNorm, normalMatrix, ref).normalize();
         return this;
     }
 

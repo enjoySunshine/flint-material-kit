@@ -3234,8 +3234,12 @@ export class Mesh extends AbstractMesh implements IGetSetVerticesData {
         // Normals
         if (this.isVerticesDataPresent(VertexBuffer.NormalKind)) {
             data = <FloatArray>this.getVerticesData(VertexBuffer.NormalKind);
+            // Normals must be transformed by the inverse transpose of the upper-left 3x3 of the matrix,
+            // so that they stay orthogonal to the transformed surface when the transform contains non-uniform scaling.
+            const normalMatrix = new Matrix();
+            transform.toNormalMatrix(normalMatrix);
             for (index = 0; index < data.length; index += 3) {
-                Vector3.TransformNormalFromFloatsToRef(data[index], data[index + 1], data[index + 2], transform, temp)
+                Vector3.TransformNormalFromFloatsToRef(data[index], data[index + 1], data[index + 2], normalMatrix, temp)
                     .normalize()
                     .toArray(data, index);
             }

@@ -606,9 +606,12 @@ export class VertexData implements IVertexDataLike {
     private static _TransformVector3Normals(normals: FloatArray, transformation: DeepImmutable<Matrix>, offset = 0, length = normals.length) {
         const normal = TmpVectors.Vector3[0];
         const transformedNormal = TmpVectors.Vector3[1];
+        // Normals must be transformed by the inverse transpose so that non-uniform scaling does not skew them.
+        const normalMatrix = transformation.toNormalMatrix(TmpVectors.Matrix[2]);
         for (let index = offset; index < offset + length; index += 3) {
             Vector3.FromArrayToRef(normals, index, normal);
-            Vector3.TransformNormalToRef(normal, transformation, transformedNormal);
+            Vector3.TransformNormalToRef(normal, normalMatrix, transformedNormal);
+            transformedNormal.normalize();
             normals[index] = transformedNormal.x;
             normals[index + 1] = transformedNormal.y;
             normals[index + 2] = transformedNormal.z;
